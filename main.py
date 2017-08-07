@@ -2,6 +2,7 @@
 #coding=utf8
 
 import sys,os
+import ConfigParser
 reload(sys)
 sys.setdefaultencoding('utf8')
 import requests
@@ -11,6 +12,13 @@ from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.support.select import Select
 from excelio import *
+
+def getConfig(section,key):
+    config = ConfigParser.ConfigParser()
+    #其中 os.path.split(os.path.realpath(__file__))[0] 得到的是当前文件模块的目录
+    path = os.path.split(os.path.realpath(__file__))[0] + '/config.conf'
+    config.read(path)
+    return config.get(section,key)
 
 dcap = dict(DesiredCapabilities.PHANTOMJS)  #设置userAgent
 dcap["phantomjs.page.settings.userAgent"] = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:25.0) Gecko/20100101 Firefox/25.0 ")
@@ -22,9 +30,11 @@ class MyPhantomJS:
     url = 'https://ccclub.cmbchina.com/mca/MPreContract.aspx'
 
     def __init__(self):
-        self.u_name = '口吴B'
+        self.url = getConfig('address','url')
+        print self.url
+        self.u_name = '口吴'
         self.u_id = '310115198712035132'
-        self.u_mobile = '13795322945'
+        self.u_mobile = '13524013266'
         self.u_smscode = '12345' #验证码
         self.u_selpro = u'A 安徽省' #选择框 直辖市
         self.u_selcity = u'合肥市' #城市 sel
@@ -110,3 +120,4 @@ if __name__ == '__main__':
         test()
     else:
         main()
+    os.system('killall -9 phantomjs')
