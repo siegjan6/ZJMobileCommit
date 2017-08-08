@@ -12,6 +12,10 @@ from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.support.select import Select
 from excelio import *
+from selenium.webdriver.common.proxy import Proxy
+from selenium.webdriver.common.proxy import ProxyType
+
+
 
 def getConfig(section,key):
     config = ConfigParser.ConfigParser()
@@ -29,7 +33,18 @@ driver.set_window_size(320,568)
 class MyPhantomJS:
     url = 'https://ccclub.cmbchina.com/mca/MPreContract.aspx'
 
+
     def __init__(self):
+        self.proxy = Proxy(
+        {
+            'proxyType': ProxyType.MANUAL,
+            'httpProxy': 'ip:port'  # 代理ip和端口
+        }
+        # 新建一个“期望技能”，哈哈
+        self.desired_capabilities = DesiredCapabilities.PHANTOMJS.copy()
+        # 把代理ip加入到技能中
+        self.proxy.add_to_capabilities(desired_capabilities)
+
         self.url = getConfig('address','url')
         print self.url
         self.u_name = '口吴'
@@ -82,11 +97,12 @@ class MyPhantomJS:
 
     def run(self):
         try:
+            #driver.start_session(self.desired_capabilities)
             driver.get(self.url)
+            driver.find_element_by_id("ckAgree").click()
             driver.find_element_by_id('ctl00_ContentPlaceHolder1_txbName').send_keys(self.u_name.decode())
             driver.find_element_by_id('ctl00_ContentPlaceHolder1_txbCardId').send_keys(self.u_id)
             driver.find_element_by_id('tbxMobile').send_keys(self.u_mobile)
-            driver.find_element_by_id('tbxSMSCode').send_keys(self.u_smscode)
             Select(driver.find_element_by_id('selpro')).select_by_value(self.u_selpro)
             Select(driver.find_element_by_id('selcity')).select_by_value(self.u_selcity)
             Select(driver.find_element_by_id('selqu')).select_by_value(self.u_selqu)
@@ -94,6 +110,13 @@ class MyPhantomJS:
             driver.find_element_by_id('ctl00_ContentPlaceHolder1_tbxUnitName').send_keys(self.u_unitname)
             Select(driver.find_element_by_id('ctl00_ContentPlaceHolder1_seledu')).select_by_value(self.u_seledu)
             Select(driver.find_element_by_id('ctl00_ContentPlaceHolder1_selDuty')).select_by_value(self.u_selduty)
+
+            driver.find_element_by_id("dl_an_submit").click() # click get smscode
+            time.sleep(1)
+            self.u_smscode = input('%s Please input smsCode:'% self.u_mobile)
+            driver.find_element_by_id('tbxSMSCode').send_keys(self.u_smscode)
+            driver.find_element_by_id("ctl00_ContentPlaceHolder1_btnQuery").click() #submit
+#driver.find_element_by_xpath("//div[@id='errmsg']").text
             #print 'done'
         except Exception as e:
             print e
